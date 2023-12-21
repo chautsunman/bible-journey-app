@@ -1,6 +1,38 @@
+import 'package:bible_journey_app/root_app.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer' as developer;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
-void main() {
+import 'firebase_options.dart';
+
+Future<void> main() async {
+  final log = Logger('main');
+  Logger.root.onRecord.listen((record) {
+    developer.log('${record.time} [${record.level.name}] ${record.loggerName} - ${record.message}');
+  });
+
+  log.info('APPINIT - kDebugMode: $kDebugMode');
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  if (kDebugMode) {
+    try {
+      FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+      await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+    } catch (e) {
+      // ignore: avoid_print
+      print(e);
+    }
+  }
+
   runApp(const MyApp());
 }
 
@@ -11,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Bible Journey',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -31,7 +63,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const RootApp(),
     );
   }
 }
